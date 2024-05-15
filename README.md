@@ -1,0 +1,1 @@
+# flutter_json_serializable_2024
