@@ -20,9 +20,15 @@ class _HomeState extends State<Home> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> data = json.decode(response.body);
-        setState(() {
-          _result = "Resultado: ${data['logradouro']}, ${data['bairro']}, ${data['localidade']}, ${data['uf']}";
-        });
+        if (data.containsKey('erro')) {
+          setState(() {
+            _result = "Erro: CEP não encontrado.";
+          });
+        } else {
+          setState(() {
+            _result = "Resultado: ${data['logradouro']}, ${data['bairro']}, ${data['localidade']}, ${data['uf']}";
+          });
+        }
       } else {
         setState(() {
           _result = "Erro: não foi possível consultar o CEP.";
@@ -51,7 +57,7 @@ class _HomeState extends State<Home> {
               controller: _cepController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: "Digite o CEP exemplo: 1833400",
+                labelText: "Digite o CEP exemplo: 01001000",
               ),
               style: TextStyle(fontSize: 15),
             ),
@@ -75,3 +81,7 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+void main() => runApp(MaterialApp(
+  home: Home(),
+));
