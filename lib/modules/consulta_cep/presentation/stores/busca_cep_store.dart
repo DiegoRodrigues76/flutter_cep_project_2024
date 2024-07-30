@@ -1,18 +1,38 @@
-import 'package:flutter_modular/flutter_modular.dart'; // Importa o pacote Flutter Modular para modularização do aplicativo
-import '../../domain/user_case/busca_cep_case.dart'; // Importa o caso de uso de busca de CEP (BuscaCepCase)
-import '../../data/model/cep_model.dart'; // Importa o modelo de dados para CEP (CepModel)
+import '../../domain/user_case/busca_cep_case.dart';
+// Importa o user case `BuscaCepCase`, que contém a lógica de busca de CEP
 
-// Define uma classe BuscaCepStore
+import '../../data/model/cep_model.dart';
+// Importa o modelo de dados `CepModel`, que define a estrutura dos dados de um CEP
+
 class BuscaCepStore {
-  // Obtém uma instância de BuscaCepCase do container de injeção de dependências
-  final _buscaCepCase = Modular.get<BuscaCepCase>();
+  // Define a classe `BuscaCepStore`, que gerencia o estado relacionado à busca de CEPs
 
-  // Método assíncrono que obtém os detalhes de um CEP e retorna uma string formatada
+  final BuscaCepCase _buscaCepCase;
+  // Declara uma variável final `_buscaCepCase` do tipo `BuscaCepCase`
+
+  BuscaCepStore(this._buscaCepCase);
+  // Construtor da classe, que recebe uma instância de `BuscaCepCase` e a atribui à variável `_buscaCepCase`
+
   Future<String> getText(String cep) async {
-    // Chama o método getCep do caso de uso para obter os dados do CEP e armazena no cepModel
+    // Método que recebe um CEP como argumento e retorna uma string formatada com informações do CEP
+
     final CepModel cepModel = await _buscaCepCase.getCep(cep);
-    
-    // Retorna uma string formatada com os detalhes do CEP
+    // Chama o método `getCep` de `BuscaCepCase` para buscar os dados do CEP, retornando uma instância de `CepModel`
+
+    final cepData = {
+      'cep': cep,
+      'logradouro': cepModel.logradouro,
+      'bairro': cepModel.bairro,
+      'localidade': cepModel.localidade,
+      'uf': cepModel.uf,
+      'ddd': cepModel.ddd,
+    };
+    // Cria um mapa `cepData` com as informações do CEP obtidas
+
+    _buscaCepCase.addToDatabase(cepData);
+    // Adiciona os dados do CEP ao banco de dados chamando o método `addToDatabase` de `BuscaCepCase`
+
     return 'Logradouro: ${cepModel.logradouro}\nBairro: ${cepModel.bairro}\nLocalidade: ${cepModel.localidade}\nUF: ${cepModel.uf}\nDDD: ${cepModel.ddd}';
+    // Retorna uma string formatada contendo as informações do CEP
   }
 }

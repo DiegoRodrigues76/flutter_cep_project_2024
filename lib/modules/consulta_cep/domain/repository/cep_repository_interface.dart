@@ -1,7 +1,5 @@
-import '../../data/model/cep_model.dart'; // Importa o modelo de dados para CEP (CepModel)
+import '../../data/model/cep_model.dart'; // Importa o modelo CepModel, que representa a estrutura dos dados de um CEP
 
-// Define uma interface abstrata chamada CepRepositoryInterface
 abstract class CepRepositoryInterface {
-  // Declara um método assíncrono que deve ser implementado para obter os dados de um CEP
-  Future<CepModel> getCep(String cep);
+  Future<CepModel> getCep(String cep); // Declaração de um método assíncrono para obter os dados de um CEP
 }

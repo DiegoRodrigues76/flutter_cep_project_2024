@@ -1,33 +1,34 @@
-import 'package:dio/dio.dart'; // Importa o pacote Dio para fazer requisições HTTP
-import 'package:flutter_modular/flutter_modular.dart'; // Importa o pacote Flutter Modular para modularização do aplicativo
+import 'package:dio/dio.dart'; 
+// Importa o pacote Dio para fazer requisições HTTP
 
-// Define uma classe useDio
-class useDio {
-  // Construtor da classe useDio
-  useDio() : super();
-  
-  // Método assíncrono que faz uma requisição GET para uma URL fornecida
+import 'package:flutter_modular/flutter_modular.dart'; 
+// Importa o pacote Flutter Modular para modularização do aplicativo
+
+class UseDio {
+  UseDio() : super();
+  // Construtor da classe `UseDio`
+
   Future<Response> getResponse(String url) async {
-    // Faz a requisição GET usando Dio e armazena a resposta na variável response
-    final Response response = await Dio().get(url);
+    // Método assíncrono que faz uma requisição GET para a URL fornecida.
     
-    // Verifica se o status da resposta é 200 (OK)
+    final Response response = await Dio().get(url);
+    // Faz a requisição HTTP GET usando Dio e espera a resposta
+
     if (response.statusCode == 200) {
-      return response; // Retorna a resposta se o status for 200
+      return response;
+      // Se o código de status da resposta for 200 (OK), retorna a resposta.
     } else {
-      // Lança uma exceção se o status não for 200
       throw Exception(
           'Erro ao fazer a requisição. Código de status: ${response.statusCode}');
+      // Caso contrário, lança uma exceção com uma mensagem de erro
     }
   }
 }
 
-// Define uma classe udeDioModule que extende Module do Flutter Modular
-class udeDioModule extends Module {
-  // Sobrescreve o método exportedBinds para registrar a dependência useDio
+class UseDioModule extends Module {
   @override
   void exportedBinds(i) {
-    // Adiciona uma instância singleton de useDio ao container de injeção de dependências
-    i.addSingleton((i) => useDio());
+    i.addSingleton((i) => UseDio());
+    // Método que registra `UseDio` como um singleton no container de injeção de dependências do Flutter Modular
   }
 }

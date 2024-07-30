@@ -1,77 +1,80 @@
-import 'package:flutter/material.dart'; // Importa o pacote Flutter para construir a interface do usuário
-import 'package:flutter_modular/flutter_modular.dart'; // Importa o pacote Flutter Modular para navegação e modularização
-import '../stores/busca_cep_store.dart'; // Importa a store de busca de CEP (BuscaCepStore)
+import 'package:flutter/material.dart';
+import '../stores/busca_cep_store.dart'; // Importa a classe BuscaCepStore, responsável pela lógica de busca de CEP
+import '../../../../shared/mobx/loading_store.dart'; // Importa a classe LoadingStore, utilizada para gerenciar o estado de carregamento
+import 'package:flutter_mobx/flutter_mobx.dart'; // Importa o pacote flutter_mobx para usar o Observer com MobX
+import 'package:flutter_modular/flutter_modular.dart'; // Importa o Flutter Modular para gerenciamento de dependências e rotas
 
-// Define um widget com estado chamado BuscaCepPage
 class BuscaCepPage extends StatefulWidget {
-  // Construtor da BuscaCepPage com uma chave opcional
-  const BuscaCepPage({super.key});
-
-  // Cria o estado para o widget BuscaCepPage
   @override
   _BuscaCepPageState createState() => _BuscaCepPageState();
 }
 
-// Define o estado do widget BuscaCepPage
 class _BuscaCepPageState extends State<BuscaCepPage> {
-  // Controlador de texto para o campo de entrada de CEP
-  final TextEditingController _textController = TextEditingController();
-  // String para armazenar o texto a ser exibido
-  String _displayText = '';
-  // Instância de BuscaCepStore obtida via injeção de dependência do Modular
-  final BuscaCepStore _buscaCepStore = Modular.get<BuscaCepStore>();
+  final loadingStore = LoadingStore(); // Instancia o LoadingStore para controlar o estado de carregamento
+  final TextEditingController _textController = TextEditingController(); // Controlador para o campo de texto que armazena o CEP inserido
+  String _displayText = ''; // Texto a ser exibido como resultado ou mensagem de erro
+  final BuscaCepStore _buscaCepStore = Modular.get<BuscaCepStore>(); // Instancia o BuscaCepStore usando o Modular para gerenciar a injeção de dependência
 
-  // Método assíncrono que confirma o texto digitado e atualiza a exibição
+  // Função que é chamada ao confirmar o texto digitado
   Future<void> _confirmText() async {
-    final String cep = _textController.text; // Obtém o texto digitado (CEP)
+    loadingStore.isLoading = true; // Inicia o estado de carregamento
+    final String cep = _textController.text; // Obtém o CEP digitado pelo usuário
     try {
-      // Chama o método getText da store para obter os detalhes do CEP
-      final String cepText = await _buscaCepStore.getText(cep);
-      // Atualiza o estado com os detalhes do CEP
+      final String cepText = await _buscaCepStore.getText(cep); // Faz a requisição para obter os dados do CEP
+      await Future.delayed(const Duration(seconds: 1)); // Adiciona um atraso para simular tempo de carregamento
       setState(() {
-        _displayText = cepText;
+        loadingStore.isLoading = false; // Encerra o estado de carregamento
+        _displayText = cepText; // Atualiza o texto a ser exibido com o resultado da busca
       });
     } catch (e) {
-      // Atualiza o estado com a mensagem de erro caso a requisição falhe
+      await Future.delayed(const Duration(seconds: 2)); // Adiciona um atraso antes de exibir o erro
       setState(() {
-        _displayText = 'Erro ao fazer a requisição. Detalhes: $e';
+        loadingStore.isLoading = false; // Encerra o estado de carregamento
+        _displayText = 'Erro ao fazer a requisição. Detalhes: $e'; // Exibe uma mensagem de erro
       });
     }
   }
 
-  // Constrói a interface do usuário
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Busca CEP'), // Define o título da AppBar
-        backgroundColor: Colors.blue, // Define a cor de fundo da AppBar
+        title: const Text('Busca CEP'), // Título da AppBar
+        backgroundColor: Colors.blue, // Cor de fundo da AppBar
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Centraliza os widgets verticalmente
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0), // Adiciona um padding de 16 pixels em todos os lados
+              padding: const EdgeInsets.all(16.0),
               child: TextField(
-                controller: _textController, // Define o controlador do campo de texto
+                controller: _textController, // Controlador do campo de texto para capturar a entrada do usuário
                 decoration: const InputDecoration(
-                  labelText: 'Digite um CEP', // Define o rótulo do campo de texto
+                  labelText: 'Digite um CEP', // Rótulo do campo de texto
                 ),
               ),
             ),
             ElevatedButton(
-              onPressed: _confirmText, // Chama o método _confirmText ao pressionar o botão
+              onPressed: _confirmText, // Chama a função _confirmText ao pressionar o botão
               child: const Text(
-                'Confirmar', // Texto exibido no botão
-                style: TextStyle(color: Colors.black), // Estilo do texto do botão
+                'Confirmar',
+                style: TextStyle(color: Colors.black), // Cor do texto do botão
               ),
             ),
-            const SizedBox(height: 16.0), // Adiciona um espaço vertical de 16 pixels
-            Text(
-              _displayText, // Exibe o texto armazenado em _displayText
-              style: const TextStyle(fontSize: 16.0), // Estilo do texto exibido
-            ),
+            const SizedBox(height: 16.0),
+            Observer(builder: (_) { // Observer para reagir às mudanças no estado de carregamento
+              if (loadingStore.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(), // Exibe um indicador de carregamento enquanto o estado é true
+                );
+              } else {
+                return Text(
+                  _displayText, // Exibe o texto resultante ou mensagem de erro
+                  style: const TextStyle(fontSize: 16.0), // Estilo do texto
+                );
+              }
+            }),
           ],
         ),
       ),
