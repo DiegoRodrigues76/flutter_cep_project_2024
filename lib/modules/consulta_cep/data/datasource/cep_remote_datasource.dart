@@ -1,32 +1,45 @@
-import 'package:dio/dio.dart'; // Importa a biblioteca Dio, usada para fazer requisições HTTP
-import '../../../../shared/dio/use_dio.dart'; // Importa uma classe personalizada para configurar e usar o Dio
-import 'package:estudo_flutter/modules/consulta_cep/data/model/cep_model.dart'; // Importa o modelo CepModel
+import 'package:dio/dio.dart';
+import '../../../../shared/dio/use_dio.dart';
+import 'package:estudo_flutter/modules/consulta_cep/data/model/cep_model.dart';
 
+// Interface que define os métodos para o datasource remoto de CEP
 abstract class CepRemoteDatasourceInterface {
-  Future<CepModel> getCep(String cep); // Declara um método assíncrono para obter dados de um CEP
+  Future<CepModel> getCep(String cep); // Obtém um CEP específico do serviço remoto
+  Future<List<CepModel>> getCepList(String cep); // Obtém uma lista de CEPs do serviço remoto
 }
 
+// Implementação da interface do datasource remoto de CEP
 class CepRemoteDatasource extends CepRemoteDatasourceInterface {
-  final UseDio _dio = UseDio(); // Instancia a classe UseDio para fazer requisições HTTP
+  // Instância da classe UseDio para gerenciar as requisições HTTP
+  final UseDio _dio = UseDio();
 
   @override
   Future<CepModel> getCep(String cep) async {
-    final regex = RegExp(r'^[0-9]{8}'); // Expressão regular para validar o formato do CEP (8 dígitos numéricos)
-    
-    // Verifica se o CEP fornecido corresponde ao formato esperado
-    if (!regex.hasMatch(cep)) {
-      throw Exception('CEP inválido'); // Lança uma exceção se o CEP não for válido
-    }
-
-    // Faz uma requisição HTTP GET para obter dados do CEP usando a URL fornecida
-    final Response response = await _dio.getResponse('https://viacep.com.br/ws/$cep/json/');
-    
-    // Verifica se a resposta da requisição foi bem-sucedida (código de status 200)
+    // Faz uma requisição HTTP para obter os dados do CEP
+    final Response response =
+        await _dio.getResponse('https://viacep.com.br/ws/$cep/json/');
     if (response.statusCode == 200) {
-      // Converte os dados da resposta (em JSON) para uma instância de CepModel e a retorna
+      // Se a resposta for bem-sucedida, converte os dados em um CepModel
       return CepModel.fromJson(response.data);
     } else {
-      // Lança uma exceção se a resposta não for bem-sucedida, incluindo o código de status
+      // Se a resposta falhar, lança uma exceção com o código de status
+      throw Exception(
+          'Erro ao fazer a requisição. Código de status: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<List<CepModel>> getCepList(String cep) async {
+    // Faz uma requisição HTTP com o dio para obter os dados de uma lista de CEPs
+    final Response response =
+        await _dio.getResponse('https://viacep.com.br/ws/$cep/json/');
+    if (response.statusCode == 200) {
+      // Se a resposta for bem-sucedida, converte os dados em uma lista de CepModel
+      return (response.data as List)
+          .map((cep) => CepModel.fromJson(cep))
+          .toList();
+    } else {
+      // Se a resposta falhar, lança uma exceção com o código de status
       throw Exception(
           'Erro ao fazer a requisição. Código de status: ${response.statusCode}');
     }

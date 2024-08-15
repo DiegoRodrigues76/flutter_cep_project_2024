@@ -1,8 +1,16 @@
-import '../../data/model/cep_model.dart'; // Importa o modelo CepModel, que representa a estrutura dos dados de um CEP
+import '../../data/model/cep_model.dart'; // Importa o modelo CepModel
 
+// Define a interface do repositório de banco de dados de CEP
 abstract class CepDbRepositoryInterface {
-  Future<void> addToDatabase(Map<String, dynamic> cepData); // Declaração de um método para adicionar dados de CEP ao banco de dados
-  Future<CepModel> getFromDatabase(String cep); // Declaração de um método para obter os dados de um CEP específico do banco de dados
-  Future<List<Map<String, dynamic>>> getCeps(); // Declaração de um método para obter todos os CEPs armazenados no banco de dados
-  Future<void> deleteCep(String cep); // Declaração de um método para deletar um CEP específico do banco de dados
+  // Método para adicionar dados ao banco de dados
+  Future<void> addToDatabase(Map<String, dynamic> cepData);
+
+  // Método para obter um CEP específico do banco de dados
+  Future<CepModel> getFromDatabase(String cep);
+
+  // Método para obter todos os CEPs do banco de dados
+  Future<List<Map<String, dynamic>>> getCeps();
+
+  // Método para deletar um CEP do banco de dados
+  Future<void> deleteCep(String cep);
 }

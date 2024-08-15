@@ -1,52 +1,57 @@
-import 'package:estudo_flutter/modules/consulta_cep/data/model/cep_model.dart'; // Importa o modelo CepModel
-import 'package:estudo_flutter/shared/database/database.dart'; // Importa a classe CepDatabase para interação com o banco de dados
-import 'package:sqflite/sqflite.dart'; // Importa a biblioteca sqflite para manipulação de banco de dados SQLite
+import 'package:estudo_flutter/modules/consulta_cep/data/model/cep_model.dart';
+import 'package:estudo_flutter/shared/database/database.dart';
+import 'package:sqflite/sqflite.dart';
 
+// Interface que define os métodos para o datasource local de CEP
 abstract class CepLocalDatasourceInterface {
-  Future<void> addToDatabase(Map<String, dynamic> cepData); // Declara um método assíncrono para adicionar dados de CEP ao banco de dados
-  Future<CepModel> getFromDatabase(String cep); // Declara um método assíncrono para obter dados de um CEP específico do banco de dados
-  Future<List<Map<String, dynamic>>> getCeps(); // Declara um método assíncrono para obter todos os CEPs armazenados no banco de dados
-  Future<void> deleteCep(String cep); // Declara um método assíncrono para deletar um CEP específico do banco de dados
+  Future<void> addToDatabase(Map<String, dynamic> cepData); // Adiciona dados ao banco de dados
+  Future<CepModel> getFromDatabase(String cep); // Obtém um CEP específico do banco de dados
+  Future<List<Map<String, dynamic>>> getCeps(); // Obtém todos os CEPs do banco de dados
+  Future<void> deleteCep(String cep); // Deleta um CEP específico do banco de dados
 }
 
+// Implementação da interface do datasource local de CEP
 class CepLocalDatasource extends CepLocalDatasourceInterface {
-  CepDatabase cepDatabase = CepDatabase(); // Instancia a classe CepDatabase para gerenciar a conexão com o banco de dados
-
+  // Instância da classe CepDatabase para gerenciar o banco de dados
+  CepDatabase cepDatabase = CepDatabase();
+  
   @override
   Future<void> addToDatabase(Map<String, dynamic> cepData) async {
-    final db = await cepDatabase.getDatabase(); // Obtém a instância do banco de dados
+    // Obtém uma instância do banco de dados
+    final db = await cepDatabase.getDatabase();
+    // Insere os dados no banco de dados, substituindo qualquer conflito
     await db.insert(
-      'CEP', // Nome da tabela onde os dados serão inseridos
-      cepData, // Dados do CEP a serem inseridos
-      conflictAlgorithm: ConflictAlgorithm.replace, // Define o algoritmo de conflito para substituir registros existentes com o mesmo ID
+      'CEP',
+      cepData,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   @override
   Future<CepModel> getFromDatabase(String cep) async {
-    final db = await cepDatabase.getDatabase(); // Obtém a instância do banco de dados
-    final List<Map<String, dynamic>> cepData = await db.query(
-      'CEP', // Nome da tabela.
-      where: 'cep = ?', // Condição de consulta para encontrar o CEP específico
-      whereArgs: [cep], // Argumentos da condição de consulta.
-    );
-    CepModel cepModel = CepModel.fromJson(cepData.first); // Converte o primeiro resultado da consulta para um objeto CepModel
-    return cepModel; // Retorna o objeto CepModel
+    // Obtém uma instância do banco de dados
+    final db = await cepDatabase.getDatabase();
+    // Consulta o banco de dados para encontrar o CEP específico
+    final List<Map<String, dynamic>> cepData =
+        await db.query('CEP', where: 'cep = ?', whereArgs: [cep]);
+    // Cria um CepModel a partir dos dados obtidos
+    CepModel cepModel = cepData.removeAt(0) as CepModel;
+    return cepModel;
   }
 
   @override
   Future<List<Map<String, dynamic>>> getCeps() async {
-    final db = await cepDatabase.getDatabase(); // Obtém a instância do banco de dados
-    return await db.query('CEP'); // Consulta todos os registros na tabela 'CEP' e retorna a lista de mapas com os dados
+    // Obtém uma instância do banco de dados
+    final db = await cepDatabase.getDatabase();
+    // Consulta o banco de dados para obter todos os CEPs
+    return await db.query('CEP');
   }
 
   @override
   Future<void> deleteCep(String cep) async {
-    final db = await cepDatabase.getDatabase(); // Obtém a instância do banco de dados
-    await db.delete(
-      'CEP', // Nome da tabela onde o registro será deletado
-      where: 'cep = ?', // Condição de deleção para encontrar o CEP específico
-      whereArgs: [cep], // Argumentos da condição de deleção
-    );
+    // Obtém uma instância do banco de dados
+    final db = await cepDatabase.getDatabase();
+    // Deleta o CEP específico do banco de dados
+    await db.delete('CEP', where: 'cep = ?', whereArgs: [cep]);
   }
 }

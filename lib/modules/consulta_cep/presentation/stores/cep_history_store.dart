@@ -1,37 +1,35 @@
 import 'package:estudo_flutter/modules/consulta_cep/data/model/cep_model.dart';
-// Importa o modelo de dados para o CEP, que provavelmente define a estrutura dos dados de CEP
+import 'package:estudo_flutter/modules/consulta_cep/domain/use_cases/cep_history_case.dart';
 
-import 'package:estudo_flutter/modules/consulta_cep/domain/user_case/cep_history_case.dart';
-// Importa o caso de uso `CepHistoryCase`, que contém a lógica para manipulação do histórico de CEPs
-
+// A classe CepHistoryStore serve como uma camada de interface para o uso dos casos de uso de histórico de CEP
 class CepHistoryStore {
-  // Define a classe `CepHistoryStore`, que gerencia o estado relacionado ao histórico de CEPs
-
+  // Instância do caso de uso CepHistoryCase que encapsula a lógica de negócios relacionada ao histórico de CEPs
   final CepHistoryCase _cepHistoryCase;
-  // Declara uma variável final `_cepHistoryCase` do tipo `CepHistoryCase`
-  // Esta é uma instância do user case que a store vai utilizar para operar sobre os dados.
 
+  // Construtor que inicializa o CepHistoryStore com uma instância de CepHistoryCase
   CepHistoryStore(this._cepHistoryCase);
-  // Construtor da classe, que recebe uma instância de `CepHistoryCase` e a atribui à variável `_cepHistoryCase`
 
+  // Método para adicionar um novo CEP ao banco de dados
+  // Recebe um mapa de dados do CEP e chama o método addToDatabase do caso de uso
   Future<void> addToDatabase(Map<String, Object> cepData) {
     return _cepHistoryCase.addToDatabase(cepData);
-    // Método para adicionar dados de CEP ao banco de dados
-    // Ele delega a operação ao método `addToDatabase` de `CepHistoryCase`.
   }
 
+  // Método para obter um CEP específico do banco de dados
+  // Recebe um CEP como string e chama o método getFromDatabase do caso de uso
   Future<CepModel> getFromDatabase(String cep) {
     return _cepHistoryCase.getFromDatabase(cep);
-    // Método para obter um CEP específico do banco de dados, usando o método `getFromDatabase` de `CepHistoryCase`
   }
 
+  // Método para obter a lista de todos os CEPs do banco de dados
+  // Chama o método getCeps do caso de uso
   Future<List<Map<String, dynamic>>> getCeps() {
     return _cepHistoryCase.getCeps();
-    // Método para obter a lista de todos os CEPs armazenados, delegando a operação ao método `getCeps` de `CepHistoryCase`
   }
 
+  // Método para deletar um CEP específico do banco de dados
+  // Recebe um CEP como string e chama o método deleteCep do caso de uso
   Future<void> deleteCep(String cep) {
     return _cepHistoryCase.deleteCep(cep);
-    // Método para deletar um CEP específico do banco de dados, usando o método `deleteCep` de `CepHistoryCase`
   }
 }

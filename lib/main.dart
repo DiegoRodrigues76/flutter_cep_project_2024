@@ -4,5 +4,5 @@ import 'modules/app_module.dart';
 import 'modules/home/presentation/widgets/app_widget.dart';
 
 void main(){
-  runApp(ModularApp(module: AppModule(), child: AppWidget()));
+  runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

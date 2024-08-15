@@ -1,24 +1,16 @@
-import '../../domain/user_case/busca_cep_case.dart';
-// Importa o user case `BuscaCepCase`, que contém a lógica de busca de CEP
-
+import '../../domain/use_cases/busca_cep_case.dart';
 import '../../data/model/cep_model.dart';
-// Importa o modelo de dados `CepModel`, que define a estrutura dos dados de um CEP
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
+// A classe BuscaCepStore serve como uma camada de interface para o uso dos casos de uso de busca de CEP
 class BuscaCepStore {
-  // Define a classe `BuscaCepStore`, que gerencia o estado relacionado à busca de CEPs
+  final BuscaCepCase _buscaCepCase; // Instância do caso de uso BuscaCepCase
+  BuscaCepStore(this._buscaCepCase); // Construtor que inicializa a instância de BuscaCepCase
 
-  final BuscaCepCase _buscaCepCase;
-  // Declara uma variável final `_buscaCepCase` do tipo `BuscaCepCase`
-
-  BuscaCepStore(this._buscaCepCase);
-  // Construtor da classe, que recebe uma instância de `BuscaCepCase` e a atribui à variável `_buscaCepCase`
-
-  Future<String> getText(String cep) async {
-    // Método que recebe um CEP como argumento e retorna uma string formatada com informações do CEP
-
-    final CepModel cepModel = await _buscaCepCase.getCep(cep);
-    // Chama o método `getCep` de `BuscaCepCase` para buscar os dados do CEP, retornando uma instância de `CepModel`
-
+  // Método para obter o texto formatado de um CEP
+  Future<String> getText(cep) async {
+    final CepModel cepModel = await _buscaCepCase.getCep(cep); // Obtém o modelo de CEP a partir do caso de uso
     final cepData = {
       'cep': cep,
       'logradouro': cepModel.logradouro,
@@ -27,12 +19,52 @@ class BuscaCepStore {
       'uf': cepModel.uf,
       'ddd': cepModel.ddd,
     };
-    // Cria um mapa `cepData` com as informações do CEP obtidas
+    _buscaCepCase.addToDatabase(cepData); // Adiciona os dados do CEP ao banco de dados
+    return 'Logradouro: ${cepModel.logradouro}\nBairro: ${cepModel.bairro}\nLocalidade: ${cepModel.localidade}\nUF: ${cepModel.uf}\nDDD: ${cepModel.ddd}'; // Retorna os dados formatados
+  }
 
-    _buscaCepCase.addToDatabase(cepData);
-    // Adiciona os dados do CEP ao banco de dados chamando o método `addToDatabase` de `BuscaCepCase`
+  // Método para obter uma lista de textos formatados de CEPs
+  Future<List<String>> getList(cep) async {
+    final List<CepModel> cepModel = await _buscaCepCase.getCepList(cep); // Obtém a lista de modelos de CEP a partir do caso de uso
+    List<String> cepDataList = [];
+    for (var cep in cepModel) {
+      final cepData = {
+        'cep': cep.cep,
+        'logradouro': cep.logradouro,
+        'bairro': cep.bairro,
+        'localidade': cep.localidade,
+        'uf': cep.uf,
+        'ddd': cep.ddd,
+      };
+      cepDataList.add('CEP: ${cep.cep}\nLogradouro: ${cep.logradouro}\nBairro: ${cep.bairro}\nLocalidade: ${cep.localidade}\nUF: ${cep.uf}\nDDD: ${cep.ddd}\n\n'); // Adiciona os dados formatados à lista
+      _buscaCepCase.addToDatabase(cepData); // Adiciona os dados do CEP ao banco de dados
+    }
+    return cepDataList; // Retorna a lista de dados formatados
+  }
 
-    return 'Logradouro: ${cepModel.logradouro}\nBairro: ${cepModel.bairro}\nLocalidade: ${cepModel.localidade}\nUF: ${cepModel.uf}\nDDD: ${cepModel.ddd}';
-    // Retorna uma string formatada contendo as informações do CEP
+  // Método para carregar estados e cidades a partir de um arquivo JSON
+  Future<List<Estado>> carregarEstadosCidades() async {
+    String response = await rootBundle.loadString('lib/shared/assets/data/estados_cidades.json'); // Carrega o conteúdo do arquivo JSON
+    var data = json.decode(response); // Decodifica o JSON
+    List<Estado> estados = (data['estados'] as List).map((i) => Estado.fromJson(i)).toList(); // Converte os dados do JSON para uma lista de objetos Estado
+    return estados; // Retorna a lista de estados
+  }
+}
+
+// Classe que representa um Estado com sua sigla, nome e lista de cidades
+class Estado {
+  final String sigla; // Sigla do estado
+  final String nome; // Nome do estado
+  final List<String> cidades; // Lista de cidades do estado
+
+  Estado({required this.sigla, required this.nome, required this.cidades}); // Construtor da classe Estado
+
+  // Método fábrica que cria um objeto Estado a partir de um JSON
+  factory Estado.fromJson(Map<String, dynamic> json) {
+    return Estado(
+      sigla: json['sigla'],
+      nome: json['nome'],
+      cidades: List<String>.from(json['cidades']), // Converte a lista de cidades do JSON para uma lista de strings
+    );
   }
 }
