@@ -25,6 +25,7 @@ class _BuscaEnderecoPageState extends State<BuscaEnderecoPage> {
   BuscaWidgets buscaWidgets = BuscaWidgets(); // Instância dos widgets específicos para busca
   List<String> _displayText = []; // Lista de textos a serem exibidos
   final BuscaCepStore _buscaCepStore = Modular.get<BuscaCepStore>(); // Instância da loja de busca de CEP obtida através do Modular
+  List<String> _historico = []; // Lista para armazenar os endereços salvos
 
   // Função para confirmar o texto e buscar o Endereço
   Future<void> _confirmText() async {
@@ -100,9 +101,25 @@ class _BuscaEnderecoPageState extends State<BuscaEnderecoPage> {
                 child: ListView.builder(
                   itemCount: _displayText.length, // Número de itens na lista
                   itemBuilder: (context, index) {
-                    return Text(
-                      _displayText[index], // Texto a ser exibido
-                      style: const TextStyle(color: Colors.black), // Estilo do texto
+                    // Retorna um Card que contém um ListTile para cada item da lista 
+                    return Card(
+                      child: ListTile(
+                        // O título do ListTile exibe o texto do item atual da lista _displayText
+                        title:Text(_displayText[index]),
+                        // Botão de ícone à direita do ListTile, com um ícone de salvar
+                        trailing: IconButton(
+                          icon: Icon(Icons.save),
+                          // Ação executada ao pressionar o botão de salvar
+                          onPressed: () {
+                            // Adiciona o item atual ao histórico
+                            _historico.add(_displayText[index]);
+                            // Exibe uma SnackBar informando que o item foi salvo no histórico
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Endereço salvo no histórico')),
+                            );
+                          },
+                        ),
+                      ),
                     );
                   },
                 ),
