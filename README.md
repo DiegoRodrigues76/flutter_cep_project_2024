@@ -54,4 +54,4 @@ Contribuições são bem-vindas! Sinta-se à vontade para enviar um pull request
 
 ## Licença
 
-Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está licenciado sob a CC0-1.0 (Creative Commons Legal Code) license - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
